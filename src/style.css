@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* --- MASTER VARIABLES --- */
+@theme {
+  --color-sg-purple-main: #6B21A8;  
+  --color-sg-purple-dark: #4C1D95;  
+  --color-sg-purple-light: #F3E8FF; 
+  
+  --color-sg-success-green: #10B981; 
+  --color-sg-error-red: #EF4444;     
+  --color-sg-warning-yellow: #F59E0B;
+  
+  --color-sg-premium-gold: #D97706;  
+  --color-sg-bg-midnight: #0F172A;   
+  --color-sg-tech-slate: #1E293B;    
+  --color-sg-tech-cyan: #0EA5E9;     
+  --color-sg-biz-navy: #1E1B4B;      
+
+  --color-sg-text-heading: #111827; 
+  --color-sg-text-body: #374151;    
+  --color-sg-bg-canvas: #F9FAFB;    
+
+  /* Typography System */
+  --font-brand: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-brand);
+    background-color: var(--color-sg-bg-canvas);
+    color: var(--color-sg-text-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-sg-text-heading);
+  }
+}
+
+@layer components {
+  /* Buttons & UI Component Styles from Brand Guidelines */
+  .btn-primary {
+    background-color: var(--color-sg-purple-main);
+    color: white;
+    font-weight: 700;
+    padding: 12px 32px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 10px 15px -3px rgba(107, 33, 168, 0.3);
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .btn-primary:hover {
+    box-shadow: 0 12px 18px -3px rgba(107, 33, 168, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background-color: white;
+    border: 2px solid #E5E7EB;
+    color: #374151;
+    font-weight: 700;
+    padding: 12px 32px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .btn-secondary:hover {
+    border-color: #D1D5DB;
+  }
+
+  /* Cards */
+  .card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    border: 1px solid #E5E7EB;
+  }
+
+  /* Section Title */
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9CA3AF;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #E5E7EB;
+    padding-bottom: 0.5rem;
+  }
+}
