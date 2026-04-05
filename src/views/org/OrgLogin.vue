@@ -10,8 +10,9 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 
-const handleLogin = () => {
-  if (store.login(email.value, password.value)) {
+const handleLogin = async () => {
+  const success = await store.login(email.value, password.value)
+  if (success) {
     router.push('/org')
   } else {
     error.value = 'Invalid credentials. Please contact your organization administrator.'
