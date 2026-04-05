@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAppStore } from '../../store'
 
@@ -8,6 +8,15 @@ const router = useRouter()
 const route = useRoute()
 
 const currentUser = computed(() => store.currentUser)
+
+onMounted(() => {
+  store.fetchDashboardStats()
+  store.fetchStudents()
+  store.fetchCefrLevels()
+  if (currentUser.value?.role === 'admin') {
+    store.fetchTeam()
+  }
+})
 
 const navItems = [
   { name: 'Overview', path: '/org', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },

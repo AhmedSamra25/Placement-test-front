@@ -61,8 +61,14 @@ const router = createRouter({
 
 import { useAppStore } from '../store'
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const store = useAppStore()
+    
+    // Recover user session before evaluating routing guards
+    if (!store.currentUser && localStorage.getItem('sg_auth_token')) {
+        await store.initAuth()
+    }
+
     if (to.meta.requiresOrgAuth && !store.currentUser) {
         next('/org/login')
     } else if (to.path === '/org/login' && store.currentUser) {
