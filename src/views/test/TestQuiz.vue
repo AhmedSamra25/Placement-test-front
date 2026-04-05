@@ -2,6 +2,7 @@
 import { computed, watch, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../../store'
+import api from '../../services/api' // import api for uploading media
 
 import ReadingQuiz from '../../components/quiz/ReadingQuiz.vue'
 import WritingQuiz from '../../components/quiz/WritingQuiz.vue'
@@ -10,6 +11,7 @@ import ListeningQuiz from '../../components/quiz/ListeningQuiz.vue'
 import VocabularyQuiz from '../../components/quiz/VocabularyQuiz.vue'
 import GrammarQuiz from '../../components/quiz/GrammarQuiz.vue'
 import PronunciationQuiz from '../../components/quiz/PronunciationQuiz.vue'
+import SpeakingItem from '../../components/quiz/SpeakingItem.vue'
 
 const store = useAppStore()
 const router = useRouter()
@@ -96,7 +98,43 @@ const saveAndPause = () => {
   router.push('/test')
 }
 
-const nextSection = () => {
+const isUploading = ref(false)
+
+const nextSection = async () => {
+  // Check and upload any pending audio blogs
+  const storedBlobs = Object.keys(store.audioBlobs)
+  if (storedBlobs.length > 0) {
+    isUploading.value = true
+    try {
+      for (const promptId of storedBlobs) {
+        const blob = store.audioBlobs[promptId]
+        const formData = new FormData()
+        formData.append('audio', blob, `${promptId}.webm`)
+        
+        const { data } = await api.post('/upload-media', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        
+        const fileUrl = data.url || (data.data && data.data.url) || data
+        
+        if (currentSection.value.id === 'speaking' || store.testState.answers.speaking[promptId]) {
+          store.testState.answers.speaking[promptId] = fileUrl
+        } else if (currentSection.value.id === 'pronunciation' || store.testState.answers.pronunciation[promptId]) {
+          store.testState.answers.pronunciation[promptId] = fileUrl
+        }
+      }
+      
+      // Clear blobs after they are uploaded securely
+      for (const promptId of storedBlobs) delete store.audioBlobs[promptId]
+    } catch (e) {
+      console.error("Failed to upload audio files.", e)
+      alert("There was an issue uploading your audio responses. Please check your network connection.")
+      isUploading.value = false
+      return
+    }
+    isUploading.value = false
+  }
+
   if (isLastSection.value) {
     // Generate mock score based on CEFR level (1-6 random) to complete test
     const mockResult = {}
@@ -133,6 +171,7 @@ const prevSection = () => {
     store.testState.currentSection--
   }
 }
+
 </script>
 
 <template>
@@ -217,20 +256,27 @@ const prevSection = () => {
         <div class="flex justify-between items-center mt-12 pt-6 border-t border-gray-100">
           <button 
             @click="prevSection" 
-            :disabled="currentSectionIndex === 0"
+            :disabled="currentSectionIndex === 0 || isUploading"
             class="btn-secondary"
-            :class="currentSectionIndex === 0 ? 'opacity-50 cursor-not-allowed hidden' : ''"
+            :class="(currentSectionIndex === 0 || isUploading) ? 'opacity-50 cursor-not-allowed hidden' : ''"
           >
             Previous
           </button>
           <div class="flex-1"></div>
           <button 
             @click="nextSection" 
-            class="btn-primary"
-            :disabled="!isCurrentSectionValid"
-            :class="!isCurrentSectionValid ? 'opacity-50 cursor-not-allowed' : ''"
+            class="btn-primary flex items-center gap-2 transition-all min-w-[150px] justify-center"
+            :disabled="!isCurrentSectionValid || isUploading"
+            :class="(!isCurrentSectionValid || isUploading) ? 'opacity-50 cursor-not-allowed' : ''"
           >
-            {{ isLastSection ? 'Submit Test' : 'Next Section' }}
+            <span v-if="isUploading">
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            <span v-if="isUploading">Saving...</span>
+            <span v-else>{{ isLastSection ? 'Submit Test' : 'Next Section' }}</span>
           </button>
         </div>
       </div>

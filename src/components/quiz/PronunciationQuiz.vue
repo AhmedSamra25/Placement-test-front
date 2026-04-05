@@ -20,31 +20,6 @@ if (!store.testState.answers.pronunciation) {
 const answers = store.testState.answers.pronunciation
 
 const activeRecordingItem = ref(null)
-const recordingTime = ref(0)
-let timer = null
-
-const toggleRecording = (itemId) => {
-  if (activeRecordingItem.value === itemId) {
-    // Stop recording
-    activeRecordingItem.value = null
-    clearInterval(timer)
-    answers[itemId] = 'recorded'
-  } else {
-    // Start recording
-    if (activeRecordingItem.value) clearInterval(timer)
-    activeRecordingItem.value = itemId
-    recordingTime.value = 0
-    timer = setInterval(() => {
-      recordingTime.value++
-    }, 1000)
-  }
-}
-
-const formatTime = (seconds) => {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0')
-  const s = (seconds % 60).toString().padStart(2, '0')
-  return `${m}:${s}`
-}
 </script>
 
 <template>
@@ -60,17 +35,17 @@ const formatTime = (seconds) => {
       <p class="text-sm text-gray-600 mb-4 font-semibold">Read the following pairs of words aloud, paying attention to the subtle differences in sound.</p>
 
       <div class="grid gap-4 md:grid-cols-3">
-        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md cursor-pointer" @click="toggleRecording('p1_1')">
+        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md">
           <p class="text-2xl font-serif text-center font-bold tracking-wide">Ship / Sheep</p>
-          <PronunciationItem itemId="p1_1" :isActive="activeRecordingItem === 'p1_1'" :isRecorded="answers.p1_1 === 'recorded'" :timeString="formatTime(recordingTime)" @toggle="toggleRecording" />
+          <PronunciationItem itemId="p1_1" :isActive="activeRecordingItem === 'p1_1'" :globalActiveItem="activeRecordingItem" @startRecording="activeRecordingItem = $event" @stopRecording="activeRecordingItem = null" />
         </div>
-        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md cursor-pointer" @click="toggleRecording('p1_2')">
+        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md">
           <p class="text-2xl font-serif text-center font-bold tracking-wide">Bat / But</p>
-          <PronunciationItem itemId="p1_2" :isActive="activeRecordingItem === 'p1_2'" :isRecorded="answers.p1_2 === 'recorded'" :timeString="formatTime(recordingTime)" @toggle="toggleRecording" />
+          <PronunciationItem itemId="p1_2" :isActive="activeRecordingItem === 'p1_2'" :globalActiveItem="activeRecordingItem" @startRecording="activeRecordingItem = $event" @stopRecording="activeRecordingItem = null" />
         </div>
-        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md cursor-pointer" @click="toggleRecording('p1_3')">
+        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md">
           <p class="text-2xl font-serif text-center font-bold tracking-wide">Think / Sink</p>
-          <PronunciationItem itemId="p1_3" :isActive="activeRecordingItem === 'p1_3'" :isRecorded="answers.p1_3 === 'recorded'" :timeString="formatTime(recordingTime)" @toggle="toggleRecording" />
+          <PronunciationItem itemId="p1_3" :isActive="activeRecordingItem === 'p1_3'" :globalActiveItem="activeRecordingItem" @startRecording="activeRecordingItem = $event" @stopRecording="activeRecordingItem = null" />
         </div>
       </div>
     </div>
@@ -81,21 +56,21 @@ const formatTime = (seconds) => {
       <p class="text-sm text-gray-600 mb-4 font-semibold">Read the following words aloud, focusing on the clarity of the consonants and vowels.</p>
 
       <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
-        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md cursor-pointer" @click="toggleRecording('p2_1')">
+        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md">
           <p class="text-xl font-serif font-bold">1. Through</p>
-          <PronunciationItem itemId="p2_1" :isActive="activeRecordingItem === 'p2_1'" :isRecorded="answers.p2_1 === 'recorded'" :timeString="formatTime(recordingTime)" @toggle="toggleRecording" />
+          <PronunciationItem itemId="p2_1" :isActive="activeRecordingItem === 'p2_1'" :globalActiveItem="activeRecordingItem" @startRecording="activeRecordingItem = $event" @stopRecording="activeRecordingItem = null" />
         </div>
-        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md cursor-pointer" @click="toggleRecording('p2_2')">
+        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md">
           <p class="text-xl font-serif font-bold">2. Measurement</p>
-          <PronunciationItem itemId="p2_2" :isActive="activeRecordingItem === 'p2_2'" :isRecorded="answers.p2_2 === 'recorded'" :timeString="formatTime(recordingTime)" @toggle="toggleRecording" />
+          <PronunciationItem itemId="p2_2" :isActive="activeRecordingItem === 'p2_2'" :globalActiveItem="activeRecordingItem" @startRecording="activeRecordingItem = $event" @stopRecording="activeRecordingItem = null" />
         </div>
-        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md cursor-pointer" @click="toggleRecording('p2_3')">
+        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md">
           <p class="text-xl font-serif font-bold">3. Specific</p>
-          <PronunciationItem itemId="p2_3" :isActive="activeRecordingItem === 'p2_3'" :isRecorded="answers.p2_3 === 'recorded'" :timeString="formatTime(recordingTime)" @toggle="toggleRecording" />
+          <PronunciationItem itemId="p2_3" :isActive="activeRecordingItem === 'p2_3'" :globalActiveItem="activeRecordingItem" @startRecording="activeRecordingItem = $event" @stopRecording="activeRecordingItem = null" />
         </div>
-        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md cursor-pointer" @click="toggleRecording('p2_4')">
+        <div class="bg-gray-50 p-4 rounded border flex justify-between items-center group hover:bg-white transition-colors hover:shadow-md">
           <p class="text-xl font-serif font-bold">4. Unbelievable</p>
-          <PronunciationItem itemId="p2_4" :isActive="activeRecordingItem === 'p2_4'" :isRecorded="answers.p2_4 === 'recorded'" :timeString="formatTime(recordingTime)" @toggle="toggleRecording" />
+          <PronunciationItem itemId="p2_4" :isActive="activeRecordingItem === 'p2_4'" :globalActiveItem="activeRecordingItem" @startRecording="activeRecordingItem = $event" @stopRecording="activeRecordingItem = null" />
         </div>
       </div>
     </div>
@@ -112,7 +87,7 @@ const formatTime = (seconds) => {
           It is crucial to find a balance between the digital world and the physical one."
         </p>
         <div class="bg-gray-50 p-4 rounded-lg border w-full sm:w-auto flex justify-center shrink-0">
-          <PronunciationItem itemId="p3_1" :isActive="activeRecordingItem === 'p3_1'" :isRecorded="answers.p3_1 === 'recorded'" :timeString="formatTime(recordingTime)" @toggle="toggleRecording" />
+          <PronunciationItem itemId="p3_1" :isActive="activeRecordingItem === 'p3_1'" :globalActiveItem="activeRecordingItem" @startRecording="activeRecordingItem = $event" @stopRecording="activeRecordingItem = null" />
         </div>
       </div>
     </div>

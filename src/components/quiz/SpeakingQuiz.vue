@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useAppStore } from '../../store'
+import SpeakingItem from './SpeakingItem.vue'
 
 const store = useAppStore()
 
@@ -15,39 +16,6 @@ if (!store.testState.answers.speaking) {
 const answers = store.testState.answers.speaking
 
 const activeRecordingPrompt = ref(null)
-const recordingTime = ref(0)
-let timer = null
-
-const toggleRecording = (promptId) => {
-  if (activeRecordingPrompt.value === promptId) {
-    // Stop recording
-    activeRecordingPrompt.value = null
-    clearInterval(timer)
-    answers[promptId] = 'recorded'
-  } else {
-    // Start recording
-    if (activeRecordingPrompt.value) clearInterval(timer)
-    activeRecordingPrompt.value = promptId
-    recordingTime.value = 0
-    timer = setInterval(() => {
-      recordingTime.value++
-    }, 1000)
-  }
-}
-
-const skipPrompt = (promptId) => {
-  if (activeRecordingPrompt.value === promptId) {
-    activeRecordingPrompt.value = null
-    clearInterval(timer)
-  }
-  answers[promptId] = 'skipped'
-}
-
-const formatTime = (seconds) => {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0')
-  const s = (seconds % 60).toString().padStart(2, '0')
-  return `${m}:${s}`
-}
 
 const prompts = [
   { id: 'p1', title: 'Prompt 1: Descriptive Speaking', desc: 'Describe your ideal travel destination. What would it look like, sound like, and feel like? Use descriptive adjectives.' },
@@ -70,40 +38,7 @@ const prompts = [
         <h4 class="font-bold text-gray-900 border-b pb-2">{{ prompt.title }}</h4>
         <p class="text-gray-700 leading-relaxed">{{ prompt.desc }}</p>
 
-        <!-- Recording Controls -->
-        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-50 bg-gray-50/50 p-4 rounded-lg">
-          <div class="flex items-center gap-4">
-            <button 
-              @click="toggleRecording(prompt.id)"
-              :disabled="activeRecordingPrompt && activeRecordingPrompt !== prompt.id"
-              class="w-12 h-12 rounded-full flex items-center justify-center transition-all bg-white border-2 relative shrink-0"
-              :class="[
-                activeRecordingPrompt === prompt.id ? 'border-red-100 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'border-gray-200 hover:border-red-100',
-                activeRecordingPrompt && activeRecordingPrompt !== prompt.id ? 'opacity-50 cursor-not-allowed' : ''
-              ]"
-            >
-              <div class="w-4 h-4 rounded-full transition-all" :class="activeRecordingPrompt === prompt.id ? 'bg-red-500 scale-75 rounded-sm' : 'bg-red-500'"></div>
-              <span v-if="activeRecordingPrompt === prompt.id" class="absolute -top-1 -right-1 flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-              </span>
-            </button>
-
-            <!-- Waveform Animation & Status -->
-            <div class="flex items-center gap-3">
-              <div v-if="activeRecordingPrompt === prompt.id" class="flex items-center gap-1 h-6">
-                <div class="w-1 bg-red-400 rounded-full animate-pulse h-full" style="animation-delay: 0s;"></div>
-                <div class="w-1 bg-red-500 rounded-full animate-pulse h-4" style="animation-delay: 0.2s;"></div>
-                <div class="w-1 bg-red-400 rounded-full animate-pulse h-5" style="animation-delay: 0.4s;"></div>
-                <div class="w-1 bg-red-500 rounded-full animate-pulse h-3" style="animation-delay: 0.1s;"></div>
-              </div>
-              <span v-if="activeRecordingPrompt === prompt.id" class="font-mono font-bold text-red-500 w-12 text-center">{{ formatTime(recordingTime) }}</span>
-              <span v-else-if="answers[prompt.id] === 'recorded'" class="text-sm font-bold text-[var(--color-sg-success-green)] uppercase tracking-wider flex items-center gap-1">✓ Recorded</span>
-              <span v-else-if="answers[prompt.id] === 'skipped'" class="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">⚠ Skipped</span>
-            </div>
-          </div>
-          <button @click="skipPrompt(prompt.id)" class="text-xs font-bold text-gray-400 hover:text-gray-600 underline uppercase pr-2">Can't Answer</button>
-        </div>
+        <SpeakingItem :promptId="prompt.id" :isActive="activeRecordingPrompt === prompt.id" :globalActivePrompt="activeRecordingPrompt" @startRecording="activeRecordingPrompt = $event" @stopRecording="activeRecordingPrompt = null" @skipPrompt="activeRecordingPrompt = null" />
       </div>
 
       <!-- Prompt 4: Interactive Context -->
@@ -119,40 +54,7 @@ const prompts = [
         </div>
         <p class="text-sm font-bold text-[var(--color-sg-purple-main)] mt-2">Your task is to respond to this friend. Offer some words of comfort and advice.</p>
         
-        <!-- Recording Controls -->
-        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-50 bg-gray-50/50 p-4 rounded-lg mt-4">
-          <div class="flex items-center gap-4">
-            <button 
-              @click="toggleRecording('p4')"
-              :disabled="activeRecordingPrompt && activeRecordingPrompt !== 'p4'"
-              class="w-12 h-12 rounded-full flex items-center justify-center transition-all bg-white border-2 relative shrink-0"
-              :class="[
-                activeRecordingPrompt === 'p4' ? 'border-red-100 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'border-gray-200 hover:border-red-100',
-                activeRecordingPrompt && activeRecordingPrompt !== 'p4' ? 'opacity-50 cursor-not-allowed' : ''
-              ]"
-            >
-              <div class="w-4 h-4 rounded-full transition-all" :class="activeRecordingPrompt === 'p4' ? 'bg-red-500 scale-75 rounded-sm' : 'bg-red-500'"></div>
-              <span v-if="activeRecordingPrompt === 'p4'" class="absolute -top-1 -right-1 flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-              </span>
-            </button>
-
-            <!-- Waveform Animation & Status -->
-            <div class="flex items-center gap-3">
-              <div v-if="activeRecordingPrompt === 'p4'" class="flex items-center gap-1 h-6">
-                <div class="w-1 bg-red-400 rounded-full animate-pulse h-full" style="animation-delay: 0s;"></div>
-                <div class="w-1 bg-red-500 rounded-full animate-pulse h-4" style="animation-delay: 0.2s;"></div>
-                <div class="w-1 bg-red-400 rounded-full animate-pulse h-5" style="animation-delay: 0.4s;"></div>
-                <div class="w-1 bg-red-500 rounded-full animate-pulse h-3" style="animation-delay: 0.1s;"></div>
-              </div>
-              <span v-if="activeRecordingPrompt === 'p4'" class="font-mono font-bold text-red-500 w-12 text-center">{{ formatTime(recordingTime) }}</span>
-              <span v-else-if="answers.p4 === 'recorded'" class="text-sm font-bold text-[var(--color-sg-success-green)] uppercase tracking-wider flex items-center gap-1">✓ Recorded</span>
-              <span v-else-if="answers.p4 === 'skipped'" class="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">⚠ Skipped</span>
-            </div>
-          </div>
-          <button @click="skipPrompt('p4')" class="text-xs font-bold text-gray-400 hover:text-gray-600 underline uppercase pr-2">Can't Answer</button>
-        </div>
+        <SpeakingItem promptId="p4" :isActive="activeRecordingPrompt === 'p4'" :globalActivePrompt="activeRecordingPrompt" @startRecording="activeRecordingPrompt = $event" @stopRecording="activeRecordingPrompt = null" @skipPrompt="activeRecordingPrompt = null" />
       </div>
     </div>
   </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useAppStore } from '../../store'
 const store = useAppStore()
 
@@ -13,35 +13,62 @@ if (!store.testState.answers.listening) {
 }
 const answers = store.testState.answers.listening
 
-// Mock Audio Player State
+// Audio Player State
 const isPlaying = ref(false)
 const progress = ref(0)
 const playCount = ref(0)
+const audio = ref(null)
+
+onMounted(() => {
+  // Initialize the audio object with the file from public/audio
+  audio.value = new Audio('/audio/speaking-national-park.mp3')
+  
+  audio.value.addEventListener('timeupdate', () => {
+    if (audio.value.duration) {
+      progress.value = (audio.value.currentTime / audio.value.duration) * 100
+    }
+  })
+
+  // When audio finishes, reset progress
+  audio.value.addEventListener('ended', () => {
+    isPlaying.value = false
+    progress.value = 0
+  })
+})
+
+onUnmounted(() => {
+  if (audio.value) {
+    audio.value.pause()
+    audio.value.removeAttribute('src')
+    audio.value.load()
+    audio.value = null
+  }
+})
 
 const togglePlay = () => {
+  if (!audio.value) return
+
   if (isPlaying.value) {
+    audio.value.pause()
     isPlaying.value = false
   } else {
-    if (playCount.value >= 2 && progress.value === 0) {
-      alert("You have already listened to this audio clip twice.")
-      return
-    }
-    isPlaying.value = true
-    if (progress.value === 0) playCount.value++
-    
-    // Simulate playing audio
-    const interval = setInterval(() => {
-      if (!isPlaying.value) {
-        clearInterval(interval)
+    // Only increment play count if starting from the beginning
+    if (progress.value === 0 || audio.value.currentTime === 0) {
+      if (playCount.value >= 2) {
+        alert("You have already listened to this audio clip twice.")
         return
       }
-      progress.value += 5
-      if (progress.value >= 100) {
-        progress.value = 0
-        isPlaying.value = false
-        clearInterval(interval)
-      }
-    }, 500)
+      playCount.value++
+    }
+    
+    // Attempt to play
+    audio.value.play().then(() => {
+      isPlaying.value = true
+    }).catch(e => {
+      console.warn("Audio playback failed. Please ensure your audio file exists in public/audio/speaking-national-park.mp3");
+      alert("Please place 'speaking-national-park.mp3' in the 'public/audio/' folder to play this audio.");
+      isPlaying.value = false;
+    })
   }
 }
 </script>

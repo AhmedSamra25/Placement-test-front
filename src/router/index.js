@@ -42,6 +42,7 @@ const routes = [
     },
     {
         path: '/test',
+        alias: '/take-test',
         component: () => import('../views/test/TestIntro.vue')
     },
     {
@@ -51,6 +52,10 @@ const routes = [
     {
         path: '/test/complete',
         component: () => import('../views/test/TestComplete.vue')
+    },
+    {
+        path: '/:pathMatch(.*)*',
+        redirect: '/test'
     }
 ]
 

@@ -1,15 +1,20 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAppStore } from '../../store'
 
 const store = useAppStore()
 const router = useRouter()
+const route = useRoute()
 
 const form = computed(() => store.testState)
 const hasSavedSession = ref(false)
 
 onMounted(() => {
+  // Prefill email and orgId from invitation URLs if present
+  if (route.query.email) form.value.studentEmail = decodeURIComponent(route.query.email)
+  if (route.query.org_id) form.value.orgId = route.query.org_id
+
   const saved = localStorage.getItem('sg_placement_test_state')
   if (saved) {
     const parsed = JSON.parse(saved)
