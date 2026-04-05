@@ -109,10 +109,12 @@ const nextSection = async () => {
       for (const promptId of storedBlobs) {
         const blob = store.audioBlobs[promptId]
         const formData = new FormData()
-        formData.append('audio', blob, `${promptId}.webm`)
+        formData.append('file', blob, `${promptId}.webm`)
+        formData.append('type', 'audio')
         
-        const { data } = await api.post('/upload-media', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+        // Let the browser set Content-Type header so boundaries are generated properly
+        const { data } = await api.post('/test/upload-media', formData, {
+          headers: { 'Content-Type': undefined }
         })
         
         const fileUrl = data.url || (data.data && data.data.url) || data
