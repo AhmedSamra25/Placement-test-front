@@ -1,8 +1,14 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAppStore } from './store'
 
 const route = useRoute()
+const store = useAppStore()
+
+onMounted(() => {
+    store.initAuth()
+})
 
 // Hide the global header inside the org portal — it has its own sidebar
 const showGlobalHeader = computed(() => !route.path.startsWith('/org'))
