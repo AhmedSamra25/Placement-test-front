@@ -122,8 +122,7 @@ export const useAppStore = defineStore('app', () => {
     }
     const testState = ref(getInitialTestState())
     
-    // Temporary storage for audio blobs before section upload (not saved to localizedStorage)
-    const audioBlobs = ref({}) // key is promptId, value is blob
+    // Temporary storage for audio blobs removed due to STT architecture
 
     const persistTestState = () => {
         localStorage.setItem('sg_placement_test_state', JSON.stringify(testState.value))
@@ -131,7 +130,6 @@ export const useAppStore = defineStore('app', () => {
     const clearTestState = () => {
         localStorage.removeItem('sg_placement_test_state')
         testState.value = { studentName: '', studentEmail: '', language: 'English', currentSection: 0, answers: {} }
-        audioBlobs.value = {}
     }
 
     const registerForTest = async (payload) => {
@@ -192,7 +190,6 @@ export const useAppStore = defineStore('app', () => {
 
         // Test Flow
         testState,
-        audioBlobs,
         persistTestState,
         clearTestState,
         registerForTest,
