@@ -20,9 +20,18 @@ const handleInvite = () => {
 }
 
 const resendFeedback = ref('')
-const resendInvite = (student) => {
-  resendFeedback.value = student.email
-  setTimeout(() => { resendFeedback.value = '' }, 3000)
+const resendInvite = async (student) => {
+  try {
+    await store.sendInvitation({
+      name: student.name,
+      email: student.email,
+      targetLanguage: student.targetLanguage || 'English'
+    })
+    resendFeedback.value = student.email
+    setTimeout(() => { resendFeedback.value = '' }, 3000)
+  } catch (e) {
+    console.error('Failed to resend invite', e)
+  }
 }
 const getStatusColor = (status) => {
   switch (status) {
