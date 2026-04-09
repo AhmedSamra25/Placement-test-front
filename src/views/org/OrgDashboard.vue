@@ -9,7 +9,7 @@ const router = useRouter()
 const org = computed(() => store.currentOrg)
 const remainingTests = computed(() => org.value.totalTests - org.value.usedTests)
 const completedTests = computed(() => store.orgStudents.filter(s => s.status === 'completed'))
-const pendingTests = computed(() => store.orgStudents.filter(s => s.status === 'pending'))
+const activePendingTests = computed(() => store.orgStudents.filter(s => s.status !== 'completed'))
 
 const completionRate = computed(() => {
   if (store.orgStudents.length === 0) return 0
@@ -74,8 +74,8 @@ const statCards = computed(() => [
     borderColor: 'border-t-[var(--color-sg-purple-main)]'
   },
   {
-    label: 'Pending Tests',
-    value: pendingTests.value.length,
+    label: 'Active/Pending',
+    value: activePendingTests.value.length,
     sub: 'awaiting completion',
     icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
     color: 'bg-yellow-50 text-yellow-600',

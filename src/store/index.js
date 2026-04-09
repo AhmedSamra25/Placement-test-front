@@ -140,6 +140,16 @@ export const useAppStore = defineStore('app', () => {
         } catch(e) { return null }
     }
 
+    const startTestSession = async () => {
+        try {
+            const { data } = await api.post('/test/start')
+            return data
+        } catch(e) { 
+            console.error('Failed to start test session', e)
+            return null 
+        }
+    }
+
     const saveSection = async (section, data) => {
         try { await api.post('/test/save-section', { section, data }) } catch(e){}
     }
@@ -193,6 +203,7 @@ export const useAppStore = defineStore('app', () => {
         persistTestState,
         clearTestState,
         registerForTest,
+        startTestSession,
         saveSection,
         submitTest,
         saveTestResult,

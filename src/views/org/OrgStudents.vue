@@ -24,6 +24,15 @@ const resendInvite = (student) => {
   resendFeedback.value = student.email
   setTimeout(() => { resendFeedback.value = '' }, 3000)
 }
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'completed': return { bg: 'bg-[var(--color-sg-success-green)]', text: 'text-[var(--color-sg-success-green)]' }
+    case 'in_progress': return { bg: 'bg-[var(--color-sg-warning-yellow)]', text: 'text-[var(--color-sg-warning-yellow)]' }
+    case 'accepted': return { bg: 'bg-cyan-500', text: 'text-cyan-600' }
+    case 'pending':
+    default: return { bg: 'bg-gray-400', text: 'text-gray-500' }
+  }
+}
 </script>
 
 <template>
@@ -70,8 +79,10 @@ const resendInvite = (student) => {
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ student.email }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[var(--color-sg-purple-main)]">{{ student.targetLanguage || 'English' }}</td>
             <td class="px-6 py-4 whitespace-nowrap flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full" :class="student.status === 'completed' ? 'bg-[var(--color-sg-success-green)]' : 'bg-[var(--color-sg-warning-yellow)]'"></span>
-              <span class="text-sm uppercase tracking-wide font-bold" :class="student.status === 'completed' ? 'text-[var(--color-sg-success-green)]' : 'text-[var(--color-sg-warning-yellow)]'">{{ student.status }}</span>
+              <span class="w-2 h-2 rounded-full" :class="getStatusColor(student.status).bg"></span>
+              <span class="text-sm uppercase tracking-wide font-bold" :class="getStatusColor(student.status).text">
+                {{ student.status.replace('_', ' ') }}
+              </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ student.testDate || '-' }}</td>
             <td class="px-6 py-4 whitespace-nowrap font-mono text-[var(--color-sg-purple-main)] font-bold">{{ student.score || '-' }}</td>

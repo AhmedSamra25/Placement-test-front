@@ -9,11 +9,22 @@ const route = useRoute()
 
 const form = computed(() => store.testState)
 const hasSavedSession = ref(false)
+const isStarting = ref(false)
 
-onMounted(() => {
+onMounted(async () => {
   // Prefill email and orgId from invitation URLs if present
   if (route.query.email) form.value.studentEmail = decodeURIComponent(route.query.email)
   if (route.query.org_id) form.value.orgId = route.query.org_id
+
+  // If student landed via invitation link, silently register them (pending → accepted)
+  // This does NOT start the timer — it just issues a session token.
+  if (route.query.email && route.query.org_id) {
+    await store.registerForTest({
+      email: form.value.studentEmail,
+      org_id: form.value.orgId,
+      name: form.value.studentName || ''
+    })
+  }
 
   const saved = localStorage.getItem('sg_placement_test_state')
   if (saved) {
@@ -28,15 +39,20 @@ const languages = [
   'English', 'Spanish', 'French', 'German', 'Italian', 'Japanese', 'Chinese', 'Arabic'
 ]
 
-const startTest = () => {
-  if (form.value.studentName && form.value.studentEmail) {
-    if (!hasSavedSession.value) {
-      store.testState.currentSection = 0
-      store.testState.answers = {}
-    }
-    store.persistTestState()
-    router.push('/test/quiz')
+const startTest = async () => {
+  if (!form.value.studentName || !form.value.studentEmail) return
+  isStarting.value = true
+
+  // Explicitly start the test — triggers accepted → in_progress on backend
+  await store.startTestSession()
+
+  if (!hasSavedSession.value) {
+    store.testState.currentSection = 0
+    store.testState.answers = {}
   }
+  store.persistTestState()
+  isStarting.value = false
+  router.push('/test/quiz')
 }
 
 const startNewTest = () => {
@@ -130,12 +146,13 @@ const startNewTest = () => {
           <div class="pt-8">
             <button 
               @click="startTest" 
-              :disabled="!form.studentName || !form.studentEmail"
+              :disabled="!form.studentName || !form.studentEmail || isStarting"
               class="btn-primary w-full py-4 text-xl font-bold shadow-lg flex justify-center items-center gap-2 group transition-all"
-              :class="!form.studentName || !form.studentEmail ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:-translate-y-1 hover:shadow-xl hover:bg-[var(--color-sg-purple-dark)]'"
+              :class="!form.studentName || !form.studentEmail || isStarting ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:-translate-y-1 hover:shadow-xl hover:bg-[var(--color-sg-purple-dark)]'"
             >
-              Begin {{ form.language }} Assessment
-              <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              <span v-if="isStarting" class="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
+              <span v-else>Begin {{ form.language }} Assessment</span>
+              <svg v-if="!isStarting" class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
             </button>
           </div>
         </div>
