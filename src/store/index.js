@@ -95,7 +95,7 @@ export const useAppStore = defineStore('app', () => {
 
     const resendInvitation = async (studentId) => {
         try {
-            await api.post(`/students/${studentId}/resend`)
+            await api.post(`/students/${studentId}/resend-invite`)
             await fetchStudents()
         } catch(e) {
             console.error(e)

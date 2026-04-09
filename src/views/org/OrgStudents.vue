@@ -20,13 +20,18 @@ const handleInvite = () => {
 }
 
 const resendFeedback = ref('')
+const resendError = ref('')
 const resendInvite = async (student) => {
+  resendFeedback.value = ''
+  resendError.value = ''
   try {
     await store.resendInvitation(student.id)
     resendFeedback.value = student.email
     setTimeout(() => { resendFeedback.value = '' }, 3000)
   } catch (e) {
     console.error('Failed to resend invite', e)
+    resendError.value = e.response?.data?.message || 'Failed to resend invitation. Please try again.'
+    setTimeout(() => { resendError.value = '' }, 5000)
   }
 }
 const getStatusColor = (status) => {
@@ -42,11 +47,19 @@ const getStatusColor = (status) => {
 
 <template>
   <div>
-    <!-- Resend Invite Toast -->
+    <!-- Resend Invite Success Toast -->
     <transition name="slide-toast">
       <div v-if="resendFeedback" class="fixed top-6 right-6 z-50 bg-[var(--color-sg-success-green)] text-white px-5 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
         Invite re-sent to {{ resendFeedback }}
+      </div>
+    </transition>
+
+    <!-- Resend Invite Error Toast -->
+    <transition name="slide-toast">
+      <div v-if="resendError" class="fixed top-6 right-6 z-50 bg-red-500 text-white px-5 py-3 rounded-xl shadow-xl font-semibold text-sm flex items-center gap-2">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        {{ resendError }}
       </div>
     </transition>
     <div class="flex justify-between items-center mb-8">
@@ -99,11 +112,12 @@ const getStatusColor = (status) => {
                 View Results
               </button>
               <button 
-                v-else
+                v-else-if="student.status === 'pending'"
                 @click="resendInvite(student)"
                 class="text-[var(--color-sg-purple-main)] font-bold hover:text-[var(--color-sg-purple-dark)] transition-colors">
                 Resend Invite
               </button>
+              <span v-else class="text-gray-400 italic">No actions</span>
             </td>
           </tr>
         </tbody>
