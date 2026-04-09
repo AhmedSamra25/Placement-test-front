@@ -89,6 +89,17 @@ export const useAppStore = defineStore('app', () => {
             await fetchStudents()
         } catch(e) {
             console.error(e)
+            throw e // propagate error so UI can handle it
+        }
+    }
+
+    const resendInvitation = async (studentId) => {
+        try {
+            await api.post(`/students/${studentId}/resend`)
+            await fetchStudents()
+        } catch(e) {
+            console.error(e)
+            throw e
         }
     }
 
@@ -190,6 +201,7 @@ export const useAppStore = defineStore('app', () => {
         fetchDashboardStats,
         fetchStudents,
         sendInvitation,
+        resendInvitation,
 
         // Settings
         cefrLevels,

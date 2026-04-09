@@ -22,11 +22,7 @@ const handleInvite = () => {
 const resendFeedback = ref('')
 const resendInvite = async (student) => {
   try {
-    await store.sendInvitation({
-      name: student.name,
-      email: student.email,
-      targetLanguage: student.targetLanguage || 'English'
-    })
+    await store.resendInvitation(student.id)
     resendFeedback.value = student.email
     setTimeout(() => { resendFeedback.value = '' }, 3000)
   } catch (e) {
